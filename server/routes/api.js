@@ -431,7 +431,7 @@ router.route('/messages')
           })
       })
     } else {
-      res.status(500).json({ message: 'Error - address or message missing' });
+      res.status(400).json({ message: 'Error - address or message missing' });
     }
   });
 
@@ -751,7 +751,7 @@ router.route('/capcodes')
         })
       logger.main.debug(util.format('%o', req.body || 'no request body'));
     } else {
-      res.status(500).json({ message: 'Error - address or alias missing' });
+      res.status(400).json({ message: 'Error - address or alias missing' });
     }
   });
 
@@ -958,7 +958,7 @@ router.route('/capcodes/:id')
           })
         logger.main.debug(util.format('%o', req.body || 'request body empty'));
       } else {
-        res.status(500).json({ message: 'Error - address or alias missing' });
+        res.status(400).json({ message: 'Error - address or alias missing' });
       }
     }
   })

@@ -1,3 +1,6 @@
+# TBA
+* Fixes #502 Update API and client to return 400 code when invalid data is received from the client. #615 @Danrw
+
 # 0.4.0 - 2023-06-04
 * Update Readme #552 @eopo
 * Add Ntfy.sh Plugin #570 @Danrw

@@ -24,7 +24,7 @@ const db = require('../knex/knex.js');
 passportStub.install(server);
 // set required settings in config file
 
-beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() => db.seed.run())));
+beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() => db.seed.run().then(() => {nconf.set('messages:HideSource', false); nconf.set('messages:apiSecurity', false); nconf.set('messages:HideCapcode', false)}))));
 afterEach(() => db.migrate.rollback().then(() => passportStub.logout()));
 
 describe('GET /api/capcodes', () => {

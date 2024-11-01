@@ -79,6 +79,46 @@ describe('POST /api/messages', () => {
                                 done();
                         });
         });
+        it('should not POST new message with missing address', done => {
+                chai.request(server)
+                        .post('/api/messages')
+                        .set({
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'User-Agent': 'CI-Test',
+                                apikey: 'reallylongkeythatneedstobechanged',
+                        })
+                        .send({
+                                message: '!@#$%^& (This is a test message with an address. 1a2b3c4d5e6e7f) !@#$%^&',
+                                timestamp,
+                                source: 'CI-Test',
+                        })
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(400);
+                                res.type.should.eql('application/json');
+                                done();
+                        });
+        });
+        it('should not POST new message with missing message', done => {
+                chai.request(server)
+                        .post('/api/messages')
+                        .set({
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'User-Agent': 'CI-Test',
+                                apikey: 'reallylongkeythatneedstobechanged',
+                        })
+                        .send({
+                                address: '000000',
+                                timestamp,
+                                source: 'CI-Test',
+                        })
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(400);
+                                res.type.should.eql('application/json');
+                                done();
+                        });
+        });
 });
 
 describe('GET /api/messages', () => {

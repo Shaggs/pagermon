@@ -1,6 +1,6 @@
 # 0.4.1 - TBA
 * Fix Inconsistent Tests - Bugs relating to tests in API. #619 @Danrw
-
+* Fixes #502 Update API and client to return 400 code when invalid data is received from the client. #615 @Danrw
 
 # 0.4.0 - Unreleased
 * Update Readme #552 @eopo

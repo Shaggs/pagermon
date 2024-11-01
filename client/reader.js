@@ -194,16 +194,20 @@ var sendPage = function(message,retries) {
     // console.log(colors.success('Message delivered. ID: '+body)); 
   })
   .catch(function (err) {
-    console.log(colors.yellow('Message failed to deliver. '+err));
-    if (retries < 10) {
-      var retryTime = Math.pow(2, retries) * 1000;
-      retries++;
-      console.log(colors.yellow(`Retrying in ${retryTime} ms`));
-      setTimeout(sendPage, retryTime, message, retries);
+    if (err.statusCode === 400) {
+        console.log(colors.red('Message failed to deliver. Missing Required field'));
     } else {
-      console.log(colors.yellow('Message failed to deliver after 10 retries, giving up'));
+        console.log(colors.yellow('Message failed to deliver. ' + err));
+        if (retries < 10) {
+            var retryTime = Math.pow(2, retries) * 1000;
+            retries++;
+            console.log(colors.yellow(`Retrying in ${retryTime} ms`));
+            setTimeout(sendPage, retryTime, message, retries);
+        } else {
+            console.log(colors.yellow('Message failed to deliver after 10 retries, giving up'));
+        }
     }
-  });
+});
 };
 
 var padDigits = function(number, digits) {

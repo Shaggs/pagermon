@@ -83,7 +83,7 @@ router.route('/messages')
       var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
     }
     db.from('messages').where(function () {
-      if( !req.isAuthenticated) this.where('capcodes.onlyShowLoggedIn',false);
+      if( !req.isAuthenticated()) this.where('capcodes.onlyShowLoggedIn',false);
       if (pdwMode) {
         if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
           this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
@@ -214,7 +214,7 @@ router.route('/messages')
         // no matches, maintain the array
         var dupeArrayLimit = dupeLimit;
         if (dupeArrayLimit == 0) {
-          dupeArrayLimit == 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
+          dupeArrayLimit = 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
         }
         if (msgBuffer.length > dupeArrayLimit) {
           msgBuffer.shift();
@@ -759,8 +759,8 @@ router.route('/capcodes')
           }
         })
         .catch((err) => {
-          logger.main.error(err)
-            .status(500).send(err);
+          logger.main.error(err);
+          res.status(500).send(err);
         })
       logger.main.debug(util.format('%o', req.body || 'no request body'));
     } else {

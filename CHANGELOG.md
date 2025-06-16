@@ -1,4 +1,11 @@
 # 0.4.1 - TBA
+* Fix critical security and functional issues in develop branch @Danrw
+* Fix authentication bypass vulnerability in API routes (req.isAuthenticated missing parentheses) @Danrw
+* Fix Telegram plugin HTML escaping with proper replace() chain and global flags @Danrw
+* Fix assignment vs comparison bug in duplicate message buffer logic @Danrw
+* Fix method chaining error in capcode creation error handler @Danrw
+* Fix Socket.io namespace missing leading slash for /adminio @Danrw
+* Fix Promise constructor missing 'new' keyword in migration @Danrw
 * Fix Inconsistent Tests - Bugs relating to tests in API. #619 @Danrw
 * Fixes #502 Update API and client to return 400 code when invalid data is received from the client. #615 @Danrw
 * Fix Telegram Markdown Errors #611 @eopo

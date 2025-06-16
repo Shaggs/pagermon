@@ -83,7 +83,6 @@ router.route('/messages')
       var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
     }
     db.from('messages').where(function () {
-      if( !req.isAuthenticated()) this.where('capcodes.onlyShowLoggedIn',false);
       if (pdwMode) {
         if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
           this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
@@ -116,7 +115,6 @@ router.route('/messages')
           db.from('messages')
             .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', db.raw('CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard'))
             .modify(function (queryBuilder) {
-              if (!req.isAuthenticated()) queryBuilder.where('capcodes.onlyShowLoggedIn',false);
               if (pdwMode) {
                 if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
                   queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
@@ -126,6 +124,7 @@ router.route('/messages')
               } else {
                 queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
               }
+              if (!req.isAuthenticated()) queryBuilder.where('capcodes.onlyShowLoggedIn',false);
             })
             .orderBy('messages.timestamp', 'desc')
             .limit(initData.limit)

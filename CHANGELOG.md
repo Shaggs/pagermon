@@ -6,6 +6,7 @@
 * Fix method chaining error in capcode creation error handler @Danrw
 * Fix Socket.io namespace missing leading slash for /adminio @Danrw
 * Fix Promise constructor missing 'new' keyword in migration @Danrw
+* Fix database query error for onlyShowLoggedIn column reference before table join @Danrw
 * Fix Inconsistent Tests - Bugs relating to tests in API. #619 @Danrw
 * Fixes #502 Update API and client to return 400 code when invalid data is received from the client. #615 @Danrw
 * Fix Telegram Markdown Errors #611 @eopo

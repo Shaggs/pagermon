@@ -1,6 +1,3 @@
-
-var version = "0.4.0-beta";
-
 var debug = require('debug')('pagermon:server');
 var io = require('@pm2/io').init({
     http          : true, // HTTP routes logging (default: true)
@@ -23,7 +20,7 @@ var fs = require('fs');
 var session = require('express-session');
 var SQLiteStore = require('connect-sqlite3')(session);
 var flash    = require('connect-flash');
-
+const { version } = require('./package.json');
 
 
 process.on('SIGINT', function() {

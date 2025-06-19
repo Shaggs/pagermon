@@ -1,3 +1,4 @@
+
 var version = "0.4.0-beta";
 
 var debug = require('debug')('pagermon:server');

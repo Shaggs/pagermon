@@ -1,5 +1,8 @@
+
 # 0.4.1 - TBA
 * Update angular-textreplace.js #640 @microsoldering1
+* Fix an error, where logging out would throw an error but work @eopo #633
+* Fix an error, where visiting sites when not logged in would throw errors @eopo #633
 * Fix Inconsistent Tests - Bugs relating to tests in API. #619 @Danrw
 * Fixes #502 Update API and client to return 400 code when invalid data is received from the client. #615 @Danrw
 * Fix Telegram Markdown Errors #611 @eopo
@@ -22,7 +25,6 @@
 * introduces showing 'Alias: None' when searching for messages without alias. #601 @eopo
 * Fix MsgInsert issues #603 @eopo 
 * Fix PiBuilder @marshy #604
-
 
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline

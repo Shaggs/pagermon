@@ -2,8 +2,10 @@ const express = require('express');
 
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const moment = require('moment');
 const nconf = require('nconf');
+const nodemailer = require('nodemailer');
 
 const confFile = './config/config.json';
 nconf.file({ file: confFile });
@@ -27,6 +29,42 @@ const store = new BruteKnex({
 const lockoutCallback = function(req, res, next, nextValidRequestDate) {
         res.status(429).send({ status: 'lockedout', error: 'Too many attempts, please try again later' });
         logger.auth.info(`Lockout: ${req.ip} Next Valid: ${nextValidRequestDate}`);
+};
+
+const generateTempPassword = () =>
+        crypto
+                .randomBytes(9)
+                .toString('base64')
+                .replace(/[+/=]/g, '')
+                .slice(0, 12);
+
+const loadSmtpConfig = () => {
+        const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SECURE, SMTP_FROM, SMTP_FROM_NAME } = process.env;
+
+        if (!SMTP_HOST || !SMTP_PORT || !SMTP_FROM) {
+                return null;
+        }
+
+        const baseConfig = {
+                host: SMTP_HOST,
+                port: Number(SMTP_PORT),
+                secure: String(SMTP_SECURE).toLowerCase() === 'true',
+                tls: {
+                        rejectUnauthorized: false,
+                },
+        };
+
+        if (SMTP_USER && SMTP_PASS) {
+                baseConfig.auth = {
+                        user: SMTP_USER,
+                        pass: SMTP_PASS,
+                };
+        }
+
+        return {
+                transport: baseConfig,
+                from: SMTP_FROM_NAME ? `${SMTP_FROM_NAME} <${SMTP_FROM}>` : SMTP_FROM,
+        };
 };
 
 const bruteforcedupe = new ExpressBrute(store, {
@@ -124,6 +162,64 @@ router.route('/login')
                                 }
                         }
                 })(req, res, next);
+        });
+
+router.route('/forgot')
+        .get(function(req, res) {
+                if (!req.isAuthenticated()) {
+                        res.render('auth', {
+                                pageTitle: 'User',
+                        });
+                } else {
+                        res.redirect('/');
+                }
+        })
+        .post(bruteforcelogin.prevent, async function(req, res) {
+                const { email } = req.body;
+
+                if (!email) {
+                        return res.status(400).send({ status: 'failed', error: 'Email is required' });
+                }
+
+                const smtpConfig = loadSmtpConfig();
+
+                if (!smtpConfig) {
+                        return res.status(500).send({
+                                status: 'failed',
+                                error: 'SMTP is not configured. Please set SMTP_HOST, SMTP_PORT and SMTP_FROM environment variables.',
+                        });
+                }
+
+                try {
+                        const user = await db('users')
+                                .whereRaw('LOWER(email) = LOWER(?)', [email])
+                                .first();
+
+                        if (user) {
+                                const tempPassword = generateTempPassword();
+                                const salt = bcrypt.genSaltSync();
+                                const hash = bcrypt.hashSync(tempPassword, salt);
+
+                                await db('users')
+                                        .where({ id: user.id })
+                                        .update({ password: hash });
+
+                                const transporter = nodemailer.createTransport(smtpConfig.transport, []);
+
+                                await transporter.sendMail({
+                                        from: smtpConfig.from,
+                                        to: user.email,
+                                        subject: 'Your PagerMon temporary password',
+                                        text: `Hi ${user.username},\n\nYour password has been reset. Use the temporary password below to sign in and update your credentials.\n\nTemporary password: ${tempPassword}\n\nFor security, please log in and change this password immediately.`,
+                                });
+                                logger.auth.info(`Temporary password emailed for ${user.username}`);
+                        }
+
+                        res.status(200).send({ status: 'ok' });
+                } catch (err) {
+                        logger.auth.error(err);
+                        res.status(500).send({ status: 'failed', error: 'Unable to process request' });
+                }
         });
 
 router.route('/logout').get(authHelper.isLoggedIn, function(req, res) {

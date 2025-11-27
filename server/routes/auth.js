@@ -7,9 +7,6 @@ const moment = require('moment');
 const nconf = require('nconf');
 const nodemailer = require('nodemailer');
 const confFile = './config/config.json';
-const confDefault = './config/default.json';
-nconf.file('defaults', { file: confDefault });
-nconf.file('user', { file: confFile });
 nconf.load();
 
 // Brute force protection for public dupe checking routes

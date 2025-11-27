@@ -194,8 +194,9 @@ router.route('/forgot')
                 if (!smtpConfig) {
                         return res.status(500).send({
                                 status: 'failed',
-                                error: 'SMTP is not configured. Please set the SMTP plugin details in Admin > Settings.',
-                        });
+                                error: 'It looks like self service password reset is not currently setup. Please contact site admin to enable this feature.',
+                        }};
+                        logger.auth.debug(`Self service password reset was attempted but SMTP is not configured.`);
                 }
 
                 try {

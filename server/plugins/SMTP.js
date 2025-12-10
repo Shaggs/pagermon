@@ -4,6 +4,12 @@ var logger = require('../log');
 function run(trigger, scope, data, config, callback) {
     var sConf = data.pluginconf.SMTP;
     if (sConf && sConf.enable) {
+        const subscribers = (data.subscribers || []).map((user) => user.email).filter(Boolean);
+        const mailto = subscribers.length > 0 ? subscribers.join(',') : sConf.mailto;
+        if (!mailto) {
+          logger.main.error('SMTP: No recipients configured for this alias');
+          return callback();
+        }
         let smtpConfig = {
             host: config.server,
             port: config.port,
@@ -21,7 +27,7 @@ function run(trigger, scope, data, config, callback) {
 
         let mailOptions = {
           from: `"${config.mailFromName}" <${config.mailFrom}>`, // sender address
-          to: sConf.mailto, // list of receivers
+          to: mailto, // list of receivers
           subject: data.agency+' - '+data.alias, // Subject line
           text: data.message, // plain text body
           html: '<b>'+data.message+'</b>' // html body

@@ -2,9 +2,11 @@ const nodemailer = require('nodemailer');
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-    var sConf = data.pluginconf.SMTP;
-    if (sConf && sConf.enable) {
-        const subscribers = (data.subscribers || []).map((user) => user.email).filter(Boolean);
+    var sConf = data.pluginconf.SMTP || {};
+    const subscribers = (data.subscribers || []).map((user) => user.email).filter(Boolean);
+    const enabled = sConf.enable || subscribers.length > 0;
+
+    if (enabled) {
         const mailto = subscribers.length > 0 ? subscribers.join(',') : sConf.mailto;
         if (!mailto) {
           logger.main.error('SMTP: No recipients configured for this alias');

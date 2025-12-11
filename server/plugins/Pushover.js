@@ -2,10 +2,13 @@ var push = require('pushover-notifications');
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-    var pConf = data.pluginconf.Pushover;
-    if (pConf && pConf.enable) {
-        const subscriberKeys = (data.subscribers || []).map((user) => user.pushover).filter(Boolean);
-        const recipients = subscriberKeys.length > 0 ? subscriberKeys : [pConf.group];
+    var pConf = data.pluginconf.Pushover || {};
+    const subscriberKeys = (data.subscribers || []).map((user) => user.pushover).filter(Boolean);
+    const hasSubscribers = subscriberKeys.length > 0;
+    const enabled = pConf.enable || hasSubscribers;
+
+    if (enabled) {
+        const recipients = hasSubscribers ? subscriberKeys : [pConf.group];
         //ensure key has been entered before trying to push
         const validRecipients = recipients.filter((value) => value && value !== 0 && value !== '0');
         if (validRecipients.length === 0) {

@@ -53,7 +53,11 @@ function getAliasSubscribers(aliasId) {
     .leftJoin('users', 'user_aliases.user_id', '=', 'users.id')
     .select('users.id', 'users.username', 'users.email', 'users.mobile', 'users.pushover')
     .where('user_aliases.alias_id', aliasId)
-    .andWhere('users.status', 'active');
+    .andWhere('users.status', 'active')
+    .catch((err) => {
+      logger.main.error('Failed to load alias subscribers', err);
+      return [];
+    });
 }
 
 // dupe init

@@ -184,36 +184,40 @@ router.route('/profile/:id')
                                 : [];
                         const lastlogondate = Date.now();
                         console.time('insert');
-
-                        db.transaction(function(trx) {
-                                return trx.from('users')
-                                        .returning('id')
-                                        .where('username', '=', req.user.username)
-                                        .update({
-                                                username,
-                                                givenname,
-                                                surname,
-                                                email,
-                                                mobile,
-                                                pushover,
-                                                lastlogondate,
-                                        })
-                                        .then(() => {
-                                                return trx('user_aliases')
-                                                        .where('user_id', req.user.id)
-                                                        .del()
+                        db('capcodes')
+                                .pluck('id')
+                                .whereIn('id', alertAliases)
+                                .then((validAliasIds) => {
+                                        return db.transaction(function(trx) {
+                                                return trx.from('users')
+                                                        .returning('id')
+                                                        .where('username', '=', req.user.username)
+                                                        .update({
+                                                                username,
+                                                                givenname,
+                                                                surname,
+                                                                email,
+                                                                mobile,
+                                                                pushover,
+                                                                lastlogondate,
+                                                        })
                                                         .then(() => {
-                                                                if (alertAliases.length === 0) {
-                                                                        return null;
-                                                                }
-                                                                const insertRows = alertAliases.map(aliasId => ({
-                                                                        user_id: req.user.id,
-                                                                        alias_id: aliasId,
-                                                                }));
-                                                                return trx('user_aliases').insert(insertRows);
+                                                                return trx('user_aliases')
+                                                                        .where('user_id', req.user.id)
+                                                                        .del()
+                                                                        .then(() => {
+                                                                                if (validAliasIds.length === 0) {
+                                                                                        return null;
+                                                                                }
+                                                                                const insertRows = validAliasIds.map(aliasId => ({
+                                                                                        user_id: req.user.id,
+                                                                                        alias_id: aliasId,
+                                                                                }));
+                                                                                return trx('user_aliases').insert(insertRows);
+                                                                        });
                                                         });
                                         });
-                        })
+                                })
                                 .then(result => {
                                         console.timeEnd('insert');
                                         res.status(200).send({ status: 'ok', id: result });

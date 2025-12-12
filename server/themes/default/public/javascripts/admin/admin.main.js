@@ -733,6 +733,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             });
           }
 
+          if (typeof $scope.alias.user_subscribable === 'undefined') {
+            $scope.alias.user_subscribable = 1;
+          }
+
           if (results.address) {
             $scope.alias.originalAddress = results.address;
             $scope.isNew = false;

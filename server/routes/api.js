@@ -760,6 +760,7 @@ router.route('/capcodes')
       var color = req.body.color || 'black';
       var icon = req.body.icon || 'question';
       var ignore = req.body.ignore || 0;
+      var user_subscribable = req.body.user_subscribable === 0 || req.body.user_subscribable === false ? 0 : 1;
       var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       db.from('capcodes')
         .where('id', '=', id)
@@ -773,6 +774,7 @@ router.route('/capcodes')
               color: color,
               icon: icon,
               ignore: ignore,
+              user_subscribable: user_subscribable,
               pluginconf: pluginconf
             })
           } else {
@@ -784,6 +786,7 @@ router.route('/capcodes')
               color: color,
               icon: icon,
               ignore: ignore,
+              user_subscribable: user_subscribable,
               pluginconf: pluginconf
             })
           }
@@ -848,6 +851,7 @@ router.route('/capcodes/:id')
       "icon": "question",
       "color": "black",
       "ignore": 0,
+      "user_subscribable": 1,
       "pluginconf": {}
     };
     if (id == 'new') {
@@ -910,6 +914,7 @@ router.route('/capcodes/:id')
         var color = req.body.color || 'black';
         var icon = req.body.icon || 'question';
         var ignore = req.body.ignore || 0;
+        var user_subscribable = req.body.user_subscribable === 0 || req.body.user_subscribable === false ? 0 : 1;
         var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
         var updateAlias = req.body.updateAlias || 0;
 
@@ -927,6 +932,7 @@ router.route('/capcodes/:id')
                 color: color,
                 icon: icon,
                 ignore: ignore,
+                user_subscribable: user_subscribable,
                 pluginconf: pluginconf
               })
             } else {
@@ -938,6 +944,7 @@ router.route('/capcodes/:id')
                 color: color,
                 icon: icon,
                 ignore: ignore,
+                user_subscribable: user_subscribable,
                 pluginconf: pluginconf
               })
             }
@@ -1054,6 +1061,7 @@ router.route('/capcodeCheck/:id')
             "icon": "question",
             "color": "black",
             "ignore": 0,
+            "user_subscribable": 1,
             "pluginconf": {}
           };
           res.status(200);

@@ -237,6 +237,7 @@ router.route('/aliases')
         .get(authHelper.isLoggedIn, function(req, res, next) {
                 db.from('capcodes')
                         .select('id', 'alias', 'agency', 'address')
+                        .where('user_subscribable', 1)
                         .orderBy('alias', 'asc')
                         .then(function(rows) {
                                 res.status(200).json(rows);

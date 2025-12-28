@@ -26,7 +26,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 }),
                 Profile: $resource('/auth/profile/me', null, {
                     'post': { method: 'POST', isArray: false }
-                })
+                }),
+                Aliases: $resource('/auth/aliases')
             };
         }])
 
@@ -213,8 +214,24 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
     .controller('ProfileController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
         $scope.alertMessage = {};
         $scope.loading = true;
+        $scope.aliases = [];
+
+        $scope.syncSelectedAliases = function () {
+            if (!$scope.aliases || !$scope.user) {
+                return;
+            }
+            var selected = new Set($scope.user.alertAliases || []);
+            $scope.aliases.forEach(function (alias) {
+                alias.selected = selected.has(alias.id);
+            });
+        };
+
+        $scope.toggleAlias = function (alias) {
+            alias.selected = !alias.selected;
+        };
         $scope.userSubmit = function () {
             $scope.loading = true;
+            $scope.user.alertAliases = $scope.aliases.filter(function (alias) { return alias.selected; }).map(function (alias) { return alias.id; });
             Api.Profile.save(null, $scope.user).$promise.then(function (response) {
                 console.log(response);
                 if (response.status == 'ok') {
@@ -239,12 +256,18 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 $scope.loading = false;
             });
         };
+        Api.Aliases.query(function (results) {
+            $scope.aliases = results;
+            $scope.syncSelectedAliases();
+        });
         Api.Profile.get( function (results) {
             $scope.user = results;
+            $scope.user.alertAliases = results.alertAliases || [];
             $scope.userLoading = false;
             $scope.existingUsername = false;
             $scope.existingEmail = false;
             $scope.loading = false;
+            $scope.syncSelectedAliases();
 
             if (results.username) {
                 $scope.user.originalUsername = results.username;

@@ -237,12 +237,22 @@ router.route('/profile/').get(authHelper.isLoggedIn, function(req, res) {
 router.route('/profile/:id')
         .get(authHelper.isLoggedIn, function(req, res, next) {
                 const { username } = req.user;
-                db.from('users')
-                        .select('id', 'givenname', 'surname', 'username', 'email', 'lastlogondate')
-                        .where('username', username)
-                        .then(function(row) {
+                const { id } = req.user;
+                const userSelect = db.from('users')
+                        .select('id', 'givenname', 'surname', 'username', 'email', 'mobile', 'pushover', 'lastlogondate')
+                        .where('username', username);
+
+                const aliasSelect = db.from('user_aliases')
+                        .pluck('alias_id')
+                        .where('user_id', id);
+
+                Promise.all([userSelect, aliasSelect])
+                        .then(function(results) {
+                                const row = results[0];
+                                const aliases = results[1];
                                 if (row.length > 0) {
                                         const rowsend = row[0];
+                                        rowsend.alertAliases = aliases || [];
                                         res.status(200);
                                         res.json(rowsend);
                                 } else {
@@ -261,17 +271,48 @@ router.route('/profile/:id')
                         const { givenname } = req.body;
                         const surname = req.body.surname || '';
                         const { email } = req.body;
+                        const mobile = req.body.mobile || null;
+                        const pushover = req.body.pushover || null;
+                        const alertAliases = Array.isArray(req.body.alertAliases)
+                                ? Array.from(new Set(req.body.alertAliases
+                                        .map(item => parseInt(item, 10))
+                                        .filter(item => !isNaN(item))))
+                                : [];
                         const lastlogondate = Date.now();
                         console.time('insert');
-                        db.from('users')
-                                .returning('id')
-                                .where('username', '=', req.user.username)
-                                .update({
-                                        username,
-                                        givenname,
-                                        surname,
-                                        email,
-                                        lastlogondate,
+                        db('capcodes')
+                                .pluck('id')
+                                .whereIn('id', alertAliases)
+                                .then((validAliasIds) => {
+                                        return db.transaction(function(trx) {
+                                                return trx.from('users')
+                                                        .returning('id')
+                                                        .where('username', '=', req.user.username)
+                                                        .update({
+                                                                username,
+                                                                givenname,
+                                                                surname,
+                                                                email,
+                                                                mobile,
+                                                                pushover,
+                                                                lastlogondate,
+                                                        })
+                                                        .then(() => {
+                                                                return trx('user_aliases')
+                                                                        .where('user_id', req.user.id)
+                                                                        .del()
+                                                                        .then(() => {
+                                                                                if (validAliasIds.length === 0) {
+                                                                                        return null;
+                                                                                }
+                                                                                const insertRows = validAliasIds.map(aliasId => ({
+                                                                                        user_id: req.user.id,
+                                                                                        alias_id: aliasId,
+                                                                                }));
+                                                                                return trx('user_aliases').insert(insertRows);
+                                                                        });
+                                                        });
+                                        });
                                 })
                                 .then(result => {
                                         console.timeEnd('insert');
@@ -286,6 +327,21 @@ router.route('/profile/:id')
                         res.status(401).json({ message: 'Please update your own details only' });
                         logger.auth.error('Possible attempt to compromise security POST:/auth/profile');
                 }
+        });
+
+router.route('/aliases')
+        .get(authHelper.isLoggedIn, function(req, res, next) {
+                db.from('capcodes')
+                        .select('id', 'alias', 'agency', 'address')
+                        .where('user_subscribable', 1)
+                        .orderBy('alias', 'asc')
+                        .then(function(rows) {
+                                res.status(200).json(rows);
+                        })
+                        .catch(err => {
+                                logger.main.error(err);
+                                return next(err);
+                        });
         });
 
 router.route('/register')

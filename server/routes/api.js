@@ -201,7 +201,7 @@ router.route('/messages')
 
       if (filterDupes) {
         // this is a bad solution and tech debt that will bite us in the ass if we ever go HA, but that's a problem for future me and that guy's a dick
-        var datetime = data.datetime || 1;
+        var datetime = data.datetime || Math.floor(Date.now() / 1000);
         var timeDiff = datetime - dupeTime;
         // if duplicate filtering is enabled, we want to populate the message buffer and check for duplicates within the limits
         var matches = _.where(msgBuffer, { message: data.message, address: data.address });
@@ -224,12 +224,12 @@ router.route('/messages')
         // no matches, maintain the array
         var dupeArrayLimit = dupeLimit;
         if (dupeArrayLimit == 0) {
-          dupeArrayLimit == 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
+          dupeArrayLimit = 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
         }
         if (msgBuffer.length > dupeArrayLimit) {
           msgBuffer.shift();
         }
-        msgBuffer.push({ message: data.message, datetime: data.datetime, address: data.address });
+        msgBuffer.push({ message: data.message, datetime: datetime, address: data.address });
       }
 
       // send data to pluginHandler before proceeding
@@ -248,7 +248,7 @@ router.route('/messages')
         }
         var address = data.address || '0000000';
         var message = data.message || 'null';
-        var datetime = data.datetime || 1;
+        var datetime = data.datetime || Math.floor(Date.now() / 1000);
         var timeDiff = datetime - dupeTime;
         var source = data.source || 'UNK';
         db.from('messages')

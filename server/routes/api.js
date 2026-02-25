@@ -63,6 +63,16 @@ function getAliasSubscribers(aliasId) {
 // dupe init
 var msgBuffer = [];
 
+function normalizeDuplicateMessage(message) {
+  return String(message || '')
+    .replace(/\r\n?/g, '\n')
+    .trim();
+}
+
+function normalizeDuplicateAddress(address) {
+  return String(address || '').trim();
+}
+
 
 router.route('/messages')
   .get(authHelper.isLoggedInMessages, function (req, res, next) {
@@ -198,13 +208,15 @@ router.route('/messages')
       var adminShow = nconf.get('messages:adminShow');
       var data = req.body;
       data.pluginData = {};
+      var duplicateMessage = normalizeDuplicateMessage(data.message);
+      var duplicateAddress = normalizeDuplicateAddress(data.address);
 
       if (filterDupes) {
         // this is a bad solution and tech debt that will bite us in the ass if we ever go HA, but that's a problem for future me and that guy's a dick
-        var datetime = data.datetime || 1;
+        var datetime = data.datetime || Math.floor(Date.now() / 1000);
         var timeDiff = datetime - dupeTime;
         // if duplicate filtering is enabled, we want to populate the message buffer and check for duplicates within the limits
-        var matches = _.where(msgBuffer, { message: data.message, address: data.address });
+        var matches = _.where(msgBuffer, { message: duplicateMessage, address: duplicateAddress });
         if (matches.length > 0) {
           if (dupeTime != 0) {
             // search the matching messages and see if any match the time constrain
@@ -224,12 +236,12 @@ router.route('/messages')
         // no matches, maintain the array
         var dupeArrayLimit = dupeLimit;
         if (dupeArrayLimit == 0) {
-          dupeArrayLimit == 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
+          dupeArrayLimit = 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
         }
         if (msgBuffer.length > dupeArrayLimit) {
           msgBuffer.shift();
         }
-        msgBuffer.push({ message: data.message, datetime: data.datetime, address: data.address });
+        msgBuffer.push({ message: duplicateMessage, datetime: datetime, address: duplicateAddress });
       }
 
       // send data to pluginHandler before proceeding
@@ -248,9 +260,11 @@ router.route('/messages')
         }
         var address = data.address || '0000000';
         var message = data.message || 'null';
-        var datetime = data.datetime || 1;
+        var datetime = data.datetime || Math.floor(Date.now() / 1000);
         var timeDiff = datetime - dupeTime;
         var source = data.source || 'UNK';
+        var normalizedMessage = normalizeDuplicateMessage(message);
+        var normalizedAddress = normalizeDuplicateAddress(address);
         db.from('messages')
           .select('*')
           .modify(function (queryBuilder) {
@@ -266,9 +280,7 @@ router.route('/messages')
                       .limit(dupeLimit)
                       .as('temp_tab')
                   })
-              })
-                .andWhere('message', '=', message)
-                .andWhere('address', '=', address)
+              });
             } else if ((dupeLimit != 0) && (dupeTime == 0)) {
               queryBuilder.where('id', 'in', function () {
                 this.select('*')
@@ -280,24 +292,23 @@ router.route('/messages')
                       .limit(dupeLimit)
                       .as('temp_tab')
                   })
-              })
-                .andWhere('message', '=', message)
-                .andWhere('address', '=', address)
+              });
             } else if ((dupeLimit == 0) && (dupeTime != 0)) {
               queryBuilder.where('id', 'in', function () {
                 this.select('id')
                   .from('messages')
                   .where('timestamp', '>', timeDiff)
-              })
-                .andWhere('message', '=', message)
-                .andWhere('address', '=', address)
+              });
             } else {
               queryBuilder.where('message', '=', message)
                 .andWhere('address', '=', address)
             }
           })
           .then((row) => {
-            if (row.length > 0 && filterDupes) {
+            var dupeInDb = _.find(row, function (msgRow) {
+              return normalizeDuplicateMessage(msgRow.message) === normalizedMessage && normalizeDuplicateAddress(msgRow.address) === normalizedAddress;
+            });
+            if (dupeInDb && filterDupes) {
               logger.main.info(util.format('Ignoring duplicate: %o', message));
               res.status(200);
               res.send('Ignoring duplicate');

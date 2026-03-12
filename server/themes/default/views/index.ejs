@@ -286,7 +286,7 @@
     
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
-    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', 'adminSocket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, adminSocket, $cookies, $location, $window) {
+    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', 'adminSocket', '$cookies', '$location', '$window', '$http', function ($scope, $routeParams, Api, socket, adminSocket, $cookies, $location, $window, $http) {
       // I hate ejs
       <% if(typeof user != 'undefined'){ %>
         $scope.user="<%=user%>";
@@ -295,7 +295,44 @@
         $scope.user="";
       <% } %>
       // get new message on socket event
+      $scope.notificationAliasIds = null;
+
+      $scope.shouldNotifyForAlias = function (message) {
+        if (!Array.isArray($scope.notificationAliasIds)) {
+          return true;
+        }
+
+        if ($scope.notificationAliasIds.length === 0) {
+          return false;
+        }
+
+        var aliasId = parseInt(message.alias_id, 10);
+        if (isNaN(aliasId)) {
+          return false;
+        }
+
+        return $scope.notificationAliasIds.indexOf(aliasId) !== -1;
+      };
+
       $scope.$on('$viewContentLoaded', function() {
+    <% if (login) { %>
+    $http.get('/auth/profile/me').then(function (response) {
+      var alertAliases = response.data && Array.isArray(response.data.alertAliases)
+        ? response.data.alertAliases
+        : [];
+
+      $scope.notificationAliasIds = alertAliases
+        .map(function (aliasId) {
+          return parseInt(aliasId, 10);
+        })
+        .filter(function (aliasId) {
+          return !isNaN(aliasId);
+        });
+    }).catch(function () {
+      // fallback to previous behavior if aliases cannot be loaded
+      $scope.notificationAliasIds = null;
+    });
+    <% } %>
       
     // register a new socket when scope changes and set Socket Typle
 
@@ -347,7 +384,7 @@
         // Send Browser Notifications  
     <% if (apisecurity) { %>
       <% if (login) { %>
-        if ($scope.notificationToastEnabled == 'true' || $scope.notificationSoundEnabled == 'true') {
+        if (($scope.notificationToastEnabled == 'true' || $scope.notificationSoundEnabled == 'true') && $scope.shouldNotifyForAlias(message)) {
         if (!message.agency) {
           //Not showing messages for things that we don't know
         } else {
@@ -357,7 +394,7 @@
         }
         <% } %>
       <% } else { %>
-        if ($scope.notificationToastEnabled == 'true' || $scope.notificationSoundEnabled == 'true') {
+        if (($scope.notificationToastEnabled == 'true' || $scope.notificationSoundEnabled == 'true') && $scope.shouldNotifyForAlias(message)) {
         if (!message.agency) {
           //Not showing messages for things that we don't know
         } else {

@@ -220,9 +220,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             if (!$scope.aliases || !$scope.user) {
                 return;
             }
-            var selected = new Set($scope.user.alertAliases || []);
+            var selected = new Set(($scope.user.alertAliases || []).map(function (aliasId) {
+                return parseInt(aliasId, 10);
+            }).filter(function (aliasId) {
+                return !isNaN(aliasId);
+            }));
             $scope.aliases.forEach(function (alias) {
-                alias.selected = selected.has(alias.id);
+                alias.selected = selected.has(parseInt(alias.id, 10));
             });
         };
 

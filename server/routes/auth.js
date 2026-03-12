@@ -239,7 +239,7 @@ router.route('/profile/:id')
                 const { username } = req.user;
                 const { id } = req.user;
                 const userSelect = db.from('users')
-                        .select('id', 'givenname', 'surname', 'username', 'email', 'mobile', 'pushover', 'lastlogondate')
+                        .select('id', 'givenname', 'surname', 'username', 'email', 'mobile', 'pushover', 'browser_toast', 'browser_sound', 'lastlogondate')
                         .where('username', username);
 
                 const aliasSelect = db.from('user_aliases')
@@ -273,6 +273,8 @@ router.route('/profile/:id')
                         const { email } = req.body;
                         const mobile = req.body.mobile || null;
                         const pushover = req.body.pushover || null;
+                        const browser_toast = req.body.browser_toast === true || req.body.browser_toast === 'true' || req.body.browser_toast === 1 || req.body.browser_toast === '1';
+                        const browser_sound = req.body.browser_sound === true || req.body.browser_sound === 'true' || req.body.browser_sound === 1 || req.body.browser_sound === '1';
                         const alertAliases = Array.isArray(req.body.alertAliases)
                                 ? Array.from(new Set(req.body.alertAliases
                                         .map(item => parseInt(item, 10))
@@ -295,6 +297,8 @@ router.route('/profile/:id')
                                                                 email,
                                                                 mobile,
                                                                 pushover,
+                                                                browser_toast,
+                                                                browser_sound,
                                                                 lastlogondate,
                                                         })
                                                         .then(() => {

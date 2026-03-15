@@ -220,9 +220,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             if (!$scope.aliases || !$scope.user) {
                 return;
             }
-            var selected = new Set($scope.user.alertAliases || []);
+            var selected = new Set(($scope.user.alertAliases || []).map(function (aliasId) {
+                return parseInt(aliasId, 10);
+            }).filter(function (aliasId) {
+                return !isNaN(aliasId);
+            }));
             $scope.aliases.forEach(function (alias) {
-                alias.selected = selected.has(alias.id);
+                alias.selected = selected.has(parseInt(alias.id, 10));
             });
         };
 
@@ -263,6 +267,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         Api.Profile.get( function (results) {
             $scope.user = results;
             $scope.user.alertAliases = results.alertAliases || [];
+            $scope.user.browser_toast = results.browser_toast !== false;
+            $scope.user.browser_sound = results.browser_sound !== false;
             $scope.userLoading = false;
             $scope.existingUsername = false;
             $scope.existingEmail = false;

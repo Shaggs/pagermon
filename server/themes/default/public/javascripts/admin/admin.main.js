@@ -45,8 +45,46 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       $scope.alertMessage = {};
       $scope.aliasSortField = 'address';
       $scope.aliasSortReverse = false;
+
+      $scope.sortAliases = function(field) {
+        if ($scope.aliasSortField == field) {
+          $scope.aliasSortReverse = !$scope.aliasSortReverse;
+        } else {
+          $scope.aliasSortField = field;
+          $scope.aliasSortReverse = false;
+        }
+        $scope.applyAliasSort();
+      };
+
+      $scope.aliasSortValue = function(alias) {
+        var value = alias[$scope.aliasSortField];
+        if ($scope.aliasSortField == 'id' || $scope.aliasSortField == 'ignore') {
+          return parseInt(value, 10) || 0;
+        }
+        if (value === null || typeof value === 'undefined') {
+          return '';
+        }
+
+        return value.toString().toLowerCase();
+      };
+
+      $scope.applyAliasSort = function() {
+        if ($scope.aliases) {
+          $scope.aliases = $filter('orderBy')($scope.aliases, $scope.aliasSortValue, $scope.aliasSortReverse);
+        }
+      };
+
+      $scope.aliasSortIcon = function(field) {
+        if ($scope.aliasSortField != field) {
+          return 'fa-sort';
+        }
+
+        return $scope.aliasSortReverse ? 'fa-sort-down' : 'fa-sort-up';
+      };
+
       Api.Aliases.query(null, function(results) {
         $scope.aliases = results;
+        $scope.applyAliasSort();
         $scope.page = 'aliases';
         $scope.loading = false;
       });
@@ -207,23 +245,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           }
           return false; //no idea what this does, was also in the code i stole and it doesn't work without it.
         }
-      };
-
-      $scope.sortAliases = function(field) {
-        if ($scope.aliasSortField == field) {
-          $scope.aliasSortReverse = !$scope.aliasSortReverse;
-        } else {
-          $scope.aliasSortField = field;
-          $scope.aliasSortReverse = false;
-        }
-      };
-
-      $scope.aliasSortIcon = function(field) {
-        if ($scope.aliasSortField != field) {
-          return 'fa-sort';
-        }
-
-        return $scope.aliasSortReverse ? 'fa-sort-down' : 'fa-sort-up';
       };
 
       $scope.aliasDetail = function (alias_id) {
@@ -1150,7 +1171,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           controller: 'AdminController'
         })
         .when('/aliases', {
-          templateUrl: '/templates/admin/aliases.html',
+          templateUrl: '/templates/admin/aliases.html?v=alias-sort',
           controller: 'AliasController'
         })
         .when('/users', {

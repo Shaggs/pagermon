@@ -43,6 +43,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
     .controller('AliasController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', 'FileSaver', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, FileSaver) {
       $scope.loading = true;
       $scope.alertMessage = {};
+      $scope.aliasSortField = 'address';
+      $scope.aliasSortReverse = false;
       Api.Aliases.query(null, function(results) {
         $scope.aliases = results;
         $scope.page = 'aliases';
@@ -205,6 +207,45 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           }
           return false; //no idea what this does, was also in the code i stole and it doesn't work without it.
         }
+      };
+
+      $scope.sortAliases = function(field) {
+        if ($scope.aliasSortField == field) {
+          $scope.aliasSortReverse = !$scope.aliasSortReverse;
+        } else {
+          $scope.aliasSortField = field;
+          $scope.aliasSortReverse = false;
+        }
+      };
+
+      $scope.aliasSortValue = function(alias) {
+        if (!$scope.aliasSortField) {
+          return '';
+        }
+        if ($scope.aliasSortField == 'messages') {
+          return parseInt(alias.id, 10) || 0;
+        }
+
+        var value = alias[$scope.aliasSortField];
+        if ($scope.aliasSortField == 'id' || $scope.aliasSortField == 'ignore') {
+          return parseInt(value, 10) || 0;
+        }
+        if (typeof value === 'boolean') {
+          return value ? 1 : 0;
+        }
+        if (value === null || typeof value === 'undefined') {
+          return '';
+        }
+
+        return value.toString().toLowerCase();
+      };
+
+      $scope.aliasSortIcon = function(field) {
+        if ($scope.aliasSortField != field) {
+          return 'fa-sort';
+        }
+
+        return $scope.aliasSortReverse ? 'fa-sort-down' : 'fa-sort-up';
       };
 
       $scope.aliasDetail = function (alias_id) {
@@ -961,10 +1002,45 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       };
 
       $scope.showPassword = false;
+      $scope.aliasTemplateSortField = 'name';
+      $scope.aliasTemplateSortReverse = false;
 
       $scope.toggleShowPassword = function() {
         $scope.showPassword = !$scope.showPassword;
       }
+
+      $scope.sortAliasTemplates = function(field) {
+        if ($scope.aliasTemplateSortField == field) {
+          $scope.aliasTemplateSortReverse = !$scope.aliasTemplateSortReverse;
+        } else {
+          $scope.aliasTemplateSortField = field;
+          $scope.aliasTemplateSortReverse = false;
+        }
+      };
+
+      $scope.aliasTemplateSortValue = function(template) {
+        if (!$scope.aliasTemplateSortField) {
+          return '';
+        }
+
+        var value = template[$scope.aliasTemplateSortField];
+        if (typeof value === 'boolean') {
+          return value ? 1 : 0;
+        }
+        if (value === null || typeof value === 'undefined') {
+          return '';
+        }
+
+        return value.toString().toLowerCase();
+      };
+
+      $scope.aliasTemplateSortIcon = function(field) {
+        if ($scope.aliasTemplateSortField != field) {
+          return 'fa-sort';
+        }
+
+        return $scope.aliasTemplateSortReverse ? 'fa-sort-down' : 'fa-sort-up';
+      };
 
       $scope.addKey = function () {
         $scope.settings.auth.keys.push({

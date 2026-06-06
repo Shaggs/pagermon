@@ -1205,3 +1205,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       });
       $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: true});
     }]);
+
+angular.element(document).on('click', '[data-alias-sort]', function(event) {
+  var field = angular.element(event.currentTarget).attr('data-alias-sort');
+  var scope = angular.element(event.currentTarget).scope();
+
+  if (!field || !scope || !scope.sortAliases) {
+    return;
+  }
+
+  if (scope.$$phase) {
+    scope.sortAliases(field);
+  } else {
+    scope.$apply(function() {
+      scope.sortAliases(field);
+    });
+  }
+});

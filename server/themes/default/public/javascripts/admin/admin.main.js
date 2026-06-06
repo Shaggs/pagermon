@@ -218,28 +218,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         }
       };
 
-      $scope.aliasSortValue = function(alias) {
-        if (!$scope.aliasSortField) {
-          return '';
-        }
-        if ($scope.aliasSortField == 'messages') {
-          return parseInt(alias.id, 10) || 0;
-        }
-
-        var value = alias[$scope.aliasSortField];
-        if ($scope.aliasSortField == 'id' || $scope.aliasSortField == 'ignore') {
-          return parseInt(value, 10) || 0;
-        }
-        if (typeof value === 'boolean') {
-          return value ? 1 : 0;
-        }
-        if (value === null || typeof value === 'undefined') {
-          return '';
-        }
-
-        return value.toString().toLowerCase();
-      };
-
       $scope.aliasSortIcon = function(field) {
         if ($scope.aliasSortField != field) {
           return 'fa-sort';

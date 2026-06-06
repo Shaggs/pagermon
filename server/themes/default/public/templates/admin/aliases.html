@@ -27,37 +27,37 @@
           <tr>
             <th></th>
             <th style="text-align: center;">
-              <a href="" ng-click="sortAliases('id')">
+              <a ng-click="sortAliases('id')" style="cursor: pointer;">
                 ID <i class="fa" ng-class="aliasSortIcon('id')"></i>
               </a>
             </th>
             <th style="text-align: center;">
-              <a href="" ng-click="sortAliases('address')">
+              <a ng-click="sortAliases('address')" style="cursor: pointer;">
                 Address <i class="fa" ng-class="aliasSortIcon('address')"></i>
               </a>
             </th>
             <th style="text-align: center;">
-              <a href="" ng-click="sortAliases('color')">
+              <a ng-click="sortAliases('color')" style="cursor: pointer;">
                 Color <i class="fa" ng-class="aliasSortIcon('color')"></i>
               </a>
             </th>
             <th style="text-align: center;">
-              <a href="" ng-click="sortAliases('icon')">
+              <a ng-click="sortAliases('icon')" style="cursor: pointer;">
                 Icon <i class="fa" ng-class="aliasSortIcon('icon')"></i>
               </a>
             </th>
             <th style="text-align: center;">
-              <a href="" ng-click="sortAliases('agency')">
+              <a ng-click="sortAliases('agency')" style="cursor: pointer;">
                 Agency <i class="fa" ng-class="aliasSortIcon('agency')"></i>
               </a>
             </th>
             <th style="text-align: center;">
-              <a href="" ng-click="sortAliases('ignore')">
+              <a ng-click="sortAliases('ignore')" style="cursor: pointer;">
                 Filter <i class="fa" ng-class="aliasSortIcon('ignore')"></i>
               </a>
             </th>
             <th style="text-align: center;">
-              <a href="" ng-click="sortAliases('alias')">
+              <a ng-click="sortAliases('alias')" style="cursor: pointer;">
                 Alias <i class="fa" ng-class="aliasSortIcon('alias')"></i>
               </a>
             </th>
@@ -65,7 +65,7 @@
           </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="alias in aliases | filter: search | orderBy:aliasSortValue:aliasSortReverse">
+        <tr ng-repeat="alias in aliases | filter: search | orderBy:aliasSortField:aliasSortReverse">
           <!-- TODO: Add links to filters -->
           <td class="shrink" style="vertical-align: middle;"><input ng-model="alias.selected" type="checkbox"/></td>
           <td class="shrink clickable-td" ng-click="aliasDetail(alias.id);" style="color: Maroon;">
@@ -76,6 +76,7 @@
           </td>
           <td class="shrink" style="background-color: {{alias.color || 'transparent'}};">
             <span style="color: {{ alias.color ? 'white' : 'black' }};"><strong>{{alias.color}}</strong></span>
+          </td>
           <td class="shrink">
               <span ng-if="alias.icon" class="fa-stack fa-lg fa-fw" style="color: {{alias.color || 'transparent'}};">
                 <i class="fa fa-circle fa-stack-2x"></i>
@@ -91,6 +92,7 @@
           </td>
           <td class="shrink clickable-td" ng-click="aliasMessages(alias.id);"><i
                   class="glyphicon glyphicon-filter"></i></td>
+        </tr>
         </tbody>
       </table>
     </div>

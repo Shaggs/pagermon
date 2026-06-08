@@ -1163,7 +1163,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           controller: 'AdminController'
         })
         .when('/aliases', {
-          templateUrl: '/templates/admin/aliases.html?v=alias-heading-sort',
+          templateUrl: '/templates/admin/aliases.html?v=alias-heading-sort-v3',
           controller: 'AliasController'
         })
         .when('/users', {

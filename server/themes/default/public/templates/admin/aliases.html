@@ -7,7 +7,7 @@
 </div>
 <div class="row" style="padding-top: 10px">
   <div class="col-sm-6 col-xs-12">
-    <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / Aliases</h4></div>
+    <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / Aliases <small class="text-muted">sort test v2</small></h4></div>
 
   <div class="col-xs-12">
           <hr />
@@ -26,32 +26,32 @@
         <thead class="thead-default">
           <tr>
             <th></th>
-            <th style="text-align: center;" ng-click="sortAliases('id')">
-              <a href="">ID <i class="fa" ng-class="aliasSortIcon('id')"></i></a>
+            <th style="text-align: center;">
+              <a href="" ng-click="sortAliases('id'); $event.preventDefault()">ID <i class="fa" ng-class="aliasSortIcon('id')"></i></a>
             </th>
-            <th style="text-align: center;" ng-click="sortAliases('address')">
-              <a href="">Address <i class="fa" ng-class="aliasSortIcon('address')"></i></a>
+            <th style="text-align: center;">
+              <a href="" ng-click="sortAliases('address'); $event.preventDefault()">Address <i class="fa" ng-class="aliasSortIcon('address')"></i></a>
             </th>
-            <th style="text-align: center;" ng-click="sortAliases('color')">
-              <a href="">Color <i class="fa" ng-class="aliasSortIcon('color')"></i></a>
+            <th style="text-align: center;">
+              <a href="" ng-click="sortAliases('color'); $event.preventDefault()">Color <i class="fa" ng-class="aliasSortIcon('color')"></i></a>
             </th>
-            <th style="text-align: center;" ng-click="sortAliases('icon')">
-              <a href="">Icon <i class="fa" ng-class="aliasSortIcon('icon')"></i></a>
+            <th style="text-align: center;">
+              <a href="" ng-click="sortAliases('icon'); $event.preventDefault()">Icon <i class="fa" ng-class="aliasSortIcon('icon')"></i></a>
             </th>
-            <th style="text-align: center;" ng-click="sortAliases('agency')">
-              <a href="">Agency <i class="fa" ng-class="aliasSortIcon('agency')"></i></a>
+            <th style="text-align: center;">
+              <a href="" ng-click="sortAliases('agency'); $event.preventDefault()">Agency <i class="fa" ng-class="aliasSortIcon('agency')"></i></a>
             </th>
-            <th style="text-align: center;" ng-click="sortAliases('ignore')">
-              <a href="">Filter <i class="fa" ng-class="aliasSortIcon('ignore')"></i></a>
+            <th style="text-align: center;">
+              <a href="" ng-click="sortAliases('ignore'); $event.preventDefault()">Filter <i class="fa" ng-class="aliasSortIcon('ignore')"></i></a>
             </th>
-            <th style="text-align: center;" ng-click="sortAliases('alias')">
-              <a href="">Alias <i class="fa" ng-class="aliasSortIcon('alias')"></i></a>
+            <th style="text-align: center;">
+              <a href="" ng-click="sortAliases('alias'); $event.preventDefault()">Alias <i class="fa" ng-class="aliasSortIcon('alias')"></i></a>
             </th>
             <th style="text-align: center;">Show messages</th>
           </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="alias in aliases | filter: search | orderBy:aliasSortValue:aliasSortReverse">
+        <tr ng-repeat="alias in aliases | filter: search | orderBy:aliasSortValue:aliasSortReverse track by alias.id">
           <!-- TODO: Add links to filters -->
           <td class="shrink" style="vertical-align: middle;"><input ng-model="alias.selected" type="checkbox"/></td>
           <td class="shrink clickable-td" ng-click="aliasDetail(alias.id);" style="color: Maroon;">

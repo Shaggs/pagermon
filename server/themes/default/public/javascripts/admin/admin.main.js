@@ -53,7 +53,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           $scope.aliasSortField = field;
           $scope.aliasSortReverse = false;
         }
-        $scope.applyAliasSort();
       };
 
       $scope.aliasSortValue = function(alias) {
@@ -68,12 +67,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         return value.toString().toLowerCase();
       };
 
-      $scope.applyAliasSort = function() {
-        if ($scope.aliases) {
-          $scope.aliases = $filter('orderBy')($scope.aliases, $scope.aliasSortValue, $scope.aliasSortReverse);
-        }
-      };
-
       $scope.aliasSortIcon = function(field) {
         if ($scope.aliasSortField != field) {
           return 'fa-sort';
@@ -84,7 +77,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
 
       Api.Aliases.query(null, function(results) {
         $scope.aliases = results;
-        $scope.applyAliasSort();
         $scope.page = 'aliases';
         $scope.loading = false;
       });
@@ -1171,7 +1163,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           controller: 'AdminController'
         })
         .when('/aliases', {
-          templateUrl: '/templates/admin/aliases.html?v=alias-sort',
+          templateUrl: '/templates/admin/aliases.html?v=alias-heading-sort',
           controller: 'AliasController'
         })
         .when('/users', {
@@ -1205,20 +1197,3 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       });
       $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: true});
     }]);
-
-angular.element(document).on('click', '[data-alias-sort]', function(event) {
-  var field = angular.element(event.currentTarget).attr('data-alias-sort');
-  var scope = angular.element(event.currentTarget).scope();
-
-  if (!field || !scope || !scope.sortAliases) {
-    return;
-  }
-
-  if (scope.$$phase) {
-    scope.sortAliases(field);
-  } else {
-    scope.$apply(function() {
-      scope.sortAliases(field);
-    });
-  }
-});

@@ -62,7 +62,24 @@ router.route('/settingsData')
         }
     });
 
-router.get('*', authHelper.isAdminGUI, function (req, res, next) {
+router.get('/editorData', authHelper.isAdminOrEditorGUI, function (req, res, next) {
+    nconf.load();
+    const plugins = [];
+    fs.readdirSync('./plugins').forEach(file => {
+        if (file.endsWith('.json')) {
+            const plugin = require('../plugins/' + file);
+            if (!plugin.disable) plugins.push(plugin);
+        }
+    });
+    res.json({
+        userRole: req.user.role,
+        aliasRefreshRequired: nconf.get('database:aliasRefreshRequired') || 0,
+        settings: { aliases: { templates: nconf.get('aliases:templates') || [] } },
+        plugins: plugins
+    });
+});
+
+router.get('*', authHelper.isAdminOrEditorGUI, function (req, res, next) {
     res.render('admin', { pageTitle: 'Admin' });
 });
 

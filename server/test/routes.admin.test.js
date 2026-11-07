@@ -487,3 +487,20 @@ describe('GET /admin/*', () => {
 
 });
 
+
+
+describe('GET /admin/editorData', () => {
+    it('returns only CAP Code editor data to an editor', done => {
+        passportStub.login({ username: 'editor', password: 'changeme', role: 'editor' });
+        chai.request(server).get('/admin/editorData').end((err, res) => {
+            should.not.exist(err);
+            res.status.should.eql(200);
+            res.body.should.have.property('userRole', 'editor');
+            res.body.should.have.property('plugins');
+            res.body.should.have.property('settings');
+            res.body.should.not.have.property('global');
+            res.body.should.not.have.property('auth');
+            done();
+        });
+    });
+});

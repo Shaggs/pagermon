@@ -741,7 +741,7 @@ router.route('/capcodes/init')
   });
 */
 router.route('/capcodes')
-  .get(authHelper.isAdmin, function (req, res, next) {
+  .get(authHelper.isCapcodeEditor, function (req, res, next) {
     nconf.load();
     var dbtype = nconf.get('database:type');
     db.from('capcodes')
@@ -760,7 +760,7 @@ router.route('/capcodes')
         return next(err);
       })
   })
-  .post(authHelper.isAdmin, function (req, res, next) {
+  .post(authHelper.isCapcodeEditor, function (req, res, next) {
     nconf.load();
     var updateRequired = nconf.get('database:aliasRefreshRequired');
     if (req.body.address && req.body.alias) {
@@ -822,7 +822,7 @@ router.route('/capcodes')
   });
 
 router.route('/capcodes/agency')
-  .get(authHelper.isAdmin, function (req, res, next) {
+  .get(authHelper.isCapcodeEditor, function (req, res, next) {
     db.from('capcodes')
       .distinct('agency')
       .then((rows) => {
@@ -836,7 +836,7 @@ router.route('/capcodes/agency')
   });
 
 router.route('/capcodes/agency/:id')
-  .get(authHelper.isAdmin, function (req, res, next) {
+  .get(authHelper.isCapcodeEditor, function (req, res, next) {
     var id = req.params.id;
     db.from('capcodes')
       .select('*')
@@ -852,7 +852,7 @@ router.route('/capcodes/agency/:id')
   });
 
 router.route('/capcodes/:id')
-  .get(authHelper.isAdmin, function (req, res, next) {
+  .get(authHelper.isCapcodeEditor, function (req, res, next) {
     var id = req.params.id;
     var defaults = {
       "id": "",
@@ -889,11 +889,14 @@ router.route('/capcodes/:id')
         })
     }
   })
-  .post(authHelper.isAdmin, function (req, res, next) {
+  .post(authHelper.isCapcodeEditor, function (req, res, next) {
     var dbtype = nconf.get('database:type');
     var id = req.params.id || req.body.id || null;
     nconf.load();
     var updateRequired = nconf.get('database:aliasRefreshRequired');
+    if (req.isAuthenticated() && req.user.role === 'editor' && id === 'deleteMultiple') {
+      return res.status(403).json({ error: 'Editors cannot delete CAP Codes.' });
+    }
     if (id == 'deleteMultiple') {
       // do delete multiple
       var idList = req.body.deleteList || [0, 0];
@@ -1052,7 +1055,7 @@ router.route('/capcodes/:id')
   });
 
 router.route('/capcodeCheck/:id')
-  .get(authHelper.isAdmin, function (req, res, next) {
+  .get(authHelper.isCapcodeEditor, function (req, res, next) {
     var id = req.params.id;
     db.from('capcodes')
       .select('*')

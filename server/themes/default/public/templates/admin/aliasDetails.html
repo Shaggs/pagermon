@@ -208,7 +208,7 @@
             </div>
 
             <div class="btn-group-vertical" id="buttons-aliasDetail">
-              <button type="button" ng-if="!isNew" ng-click="aliasDelete()" class="btn btn-danger">Delete</button>
+              <button type="button" ng-if="!isEditor && !isNew" ng-click="aliasDelete()" class="btn btn-danger">Delete</button>
               <button type="button" ng-click="aliasLoad()" class="btn btn-warning">Reset</button>
               <button type="submit" class="btn btn-success">Save</button>
             </div>
@@ -217,7 +217,7 @@
 </div>
 
 <div class="btn-group-vertical" id="buttons-capcodes">
-    <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Aliases</button>
+    <button ng-if="!isEditor && aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Aliases</button>
     <button ng-if="!isNew" type="button" ng-click="newButton('new');" class="btn btn-success">Add New</button>
 </div>
 <script>

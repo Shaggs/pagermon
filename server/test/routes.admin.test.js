@@ -504,3 +504,34 @@ describe('GET /admin/editorData', () => {
         });
     });
 });
+
+
+describe('Editor administration boundaries', () => {
+    it('allows an editor to open the CAP Code management screen', done => {
+        passportStub.login({ username: 'editor', password: 'changeme', role: 'editor' });
+        chai.request(server).get('/admin/aliases').end((err, res) => {
+            should.not.exist(err);
+            res.status.should.eql(200);
+            done();
+        });
+    });
+
+    it('redirects an editor away from system settings', done => {
+        passportStub.login({ username: 'editor', password: 'changeme', role: 'editor' });
+        chai.request(server).get('/admin/settings').redirects(0).end((err, res) => {
+            should.not.exist(err);
+            res.status.should.eql(302);
+            res.headers.location.should.eql('/admin/aliases');
+            done();
+        });
+    });
+
+    it('does not expose full system settings to an editor', done => {
+        passportStub.login({ username: 'editor', password: 'changeme', role: 'editor' });
+        chai.request(server).get('/admin/settingsData').redirects(0).end((err, res) => {
+            should.not.exist(err);
+            res.status.should.eql(401);
+            done();
+        });
+    });
+});

@@ -10,6 +10,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           'post': { method:'POST', isArray: false },
           'delete': { method: 'DELETE', isArray: false}
         }),
+        AliasEditorData: $resource('/admin/editorData'),
         Settings: $resource('/admin/settingsData', null, {
           'post': { method:'POST', isArray: false }
         }),
@@ -80,9 +81,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         $scope.page = 'aliases';
         $scope.loading = false;
       });
-      Api.Settings.get(null, function(results) {
+      Api.AliasEditorData.get(null, function(results) {
         if (results) {
-          if (results.settings.database && results.settings.database.aliasRefreshRequired == 1) {
+          $scope.isEditor = results.userRole === 'editor';
+          if (results.aliasRefreshRequired == 1) {
             $scope.aliasRefreshRequired = 1;
             $scope.alertMessage.text = 'Alias refresh required!';
             $scope.alertMessage.type = 'alert-warning';
@@ -908,9 +910,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         };
       };
       // get data on load
-      Api.Settings.get(null, function(results) {
+      Api.AliasEditorData.get(null, function(results) {
         if (results) {
-          if (results.database && results.database.aliasRefreshRequired == 1) {
+          $scope.isEditor = results.userRole === 'editor';
+          if (results.aliasRefreshRequired == 1) {
             $scope.aliasRefreshRequired = 1;
           }
           $scope.settings = results.settings;
@@ -1153,6 +1156,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
 
     .controller('AdminController', ['$scope', '$routeParams', 'Api', function ($scope, $routeParams, Api) {
       $scope.page = 'admin';
+      Api.AliasEditorData.get(null, function(results) {
+        $scope.isEditor = results.userRole === 'editor';
+      });
     }])
 
     // Routes

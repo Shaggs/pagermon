@@ -71,10 +71,19 @@ router.get('/editorData', authHelper.isAdminOrEditorGUI, function (req, res, nex
             if (!plugin.disable) plugins.push(plugin);
         }
     });
+    const pluginSettings = {};
+    plugins.forEach(plugin => {
+        pluginSettings[plugin.name] = {
+            enable: !!nconf.get('plugins:' + plugin.name + ':enable')
+        };
+    });
     res.json({
         userRole: req.user.role,
         aliasRefreshRequired: nconf.get('database:aliasRefreshRequired') || 0,
-        settings: { aliases: { templates: nconf.get('aliases:templates') || [] } },
+        settings: {
+            aliases: { templates: nconf.get('aliases:templates') || [] },
+            plugins: pluginSettings
+        },
         plugins: plugins
     });
 });

@@ -780,3 +780,55 @@ describe('POST /api/capcodeExport', () => {
 
 describe('POST /api/capcodeImport', () => {
 });
+
+describe('Editor CAP Code permissions', () => {
+    it('allows an editor to list CAP Codes', done => {
+        passportStub.login({ username: 'editor', password: 'changeme', role: 'editor' });
+        chai.request(server).get('/api/capcodes').end((err, res) => {
+            should.not.exist(err);
+            res.status.should.eql(200);
+            res.body.should.be.a('array');
+            done();
+        });
+    });
+
+    it('allows an editor to create a CAP Code', done => {
+        passportStub.login({ username: 'editor', password: 'changeme', role: 'editor' });
+        chai.request(server).post('/api/capcodes/new').send({
+            address: '7654321', alias: 'Test CAP Code', agency: 'TEST',
+            color: 'blue', icon: 'question', ignore: 0, pluginconf: {}
+        }).end((err, res) => {
+            should.not.exist(err);
+            res.status.should.eql(200);
+            res.body.status.should.eql('ok');
+            done();
+        });
+    });
+
+    it('does not allow an editor to delete a CAP Code', done => {
+        passportStub.login({ username: 'editor', password: 'changeme', role: 'editor' });
+        chai.request(server).delete('/api/capcodes/2').end((err, res) => {
+            should.not.exist(err);
+            res.status.should.eql(401);
+            done();
+        });
+    });
+
+    it('does not allow an editor to refresh CAP Code mappings', done => {
+        passportStub.login({ username: 'editor', password: 'changeme', role: 'editor' });
+        chai.request(server).post('/api/capcodeRefresh').end((err, res) => {
+            should.not.exist(err);
+            res.status.should.eql(401);
+            done();
+        });
+    });
+
+    it('does not allow an editor to access user management', done => {
+        passportStub.login({ username: 'editor', password: 'changeme', role: 'editor' });
+        chai.request(server).get('/api/user').end((err, res) => {
+            should.not.exist(err);
+            res.status.should.eql(401);
+            done();
+        });
+    });
+});

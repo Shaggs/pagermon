@@ -84,11 +84,11 @@
     </div>
   </div>
 <div class="btn-group-vertical" id="buttons-functions">
-  <button type="button" ng-click="aliasImport();" class="btn btn-success ">Import Aliases</button>
-  <button type="button" ng-click="aliasExport();" class="btn btn-success ">Export Aliases</button>
+  <button ng-if="!isEditor" type="button" ng-click="aliasImport();" class="btn btn-success ">Import Aliases</button>
+  <button ng-if="!isEditor" type="button" ng-click="aliasExport();" class="btn btn-success ">Export Aliases</button>
 </div>
 <div class="btn-group-vertical" id="buttons-management">
-  <button type="button" ng-disabled="!aliasSelected()" ng-click="aliasDelete()" class="btn btn-danger ">Delete Selected</button>
-  <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning ">Refresh Aliases</button>
+  <button ng-if="!isEditor" type="button" ng-disabled="!aliasSelected()" ng-click="aliasDelete()" class="btn btn-danger ">Delete Selected</button>
+  <button ng-if="!isEditor && aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning ">Refresh Aliases</button>
   <button class="btn btn-success " ng-click="aliasDetail('new');" type="button">Add New</button>
 </div>

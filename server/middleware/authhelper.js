@@ -45,6 +45,19 @@ function isLoggedInMessages (req, res, next) {
         }
 }
 
+function isAdminOrEditorGUI (req, res, next) {
+    if (req.isAuthenticated() && req.user.role === 'admin') return next();
+    if (req.isAuthenticated() && req.user.role === 'editor' && /^\/(?:$|editorData$|aliases(?:\/[^/]+)?\/?$)/.test(req.path)) return next();
+    if (req.isAuthenticated() && req.user.role === 'editor') return res.redirect('/admin/aliases');
+    return res.redirect('/');
+}
+
+function isCapcodeEditor (req, res, next) {
+    const passport = require('../auth/local');
+    if (req.isAuthenticated() && (req.user.role === 'admin' || req.user.role === 'editor')) return next();
+    return passport.authenticate('login-api', { session: false, failWithError: true })(req, res, next);
+}
+
 function isAdminGUI (req, res, next) {
     if (req.isAuthenticated() && req.user.role == 'admin') {
       //if the user is authenticated and the user's role is admin carry on
@@ -80,6 +93,8 @@ module.exports = {
     isLoggedInMessages,
     isAdmin,
     isAdminGUI,
+    isAdminOrEditorGUI,
+    isCapcodeEditor,
     comparePass
 }
   
